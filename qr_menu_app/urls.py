@@ -1,6 +1,7 @@
 from django.urls import path
-from . import views
+from qr_menu_app.views.index_view import index_page
+
 
 urlpatterns = [
-    path("",views.index_page)
+    path("", index_page, name="index"),
 ]
