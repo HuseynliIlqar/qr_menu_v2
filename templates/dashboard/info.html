@@ -1,0 +1,138 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+
+{% block content %}
+
+<div class="db-page-header">
+  <div>
+    <h2 class="db-page-header__title">Info Strip</h2>
+    <p class="db-page-header__sub">Manage info strip items (max 4) — address, hours, delivery, phone, etc.</p>
+  </div>
+</div>
+
+<form method="post" enctype="multipart/form-data" novalidate>
+  {% csrf_token %}
+  {{ formset.management_form }}
+
+  {% if formset.non_form_errors %}
+    <div class="db-non-field-errors">
+      {% for error in formset.non_form_errors %}{{ error }}{% endfor %}
+    </div>
+  {% endif %}
+
+  <div class="db-formset">
+    {% for form in formset %}
+      {% if form.instance.pk %}
+        <div class="db-formset-item {% if form.DELETE.value %}db-formset-item--deleted{% endif %}">
+          <div class="db-formset-item__header">
+            <span class="db-formset-item__num">{{ form.instance.name|default:"Info Item" }}</span>
+            <label class="db-delete-row">
+              {{ form.DELETE }}
+              <span>Delete</span>
+            </label>
+          </div>
+          <div class="db-formset-item__body">
+            {{ form.id }}
+            <div class="db-form-grid">
+              <div class="db-field">
+                <label class="db-label" for="{{ form.icon.id_for_label }}">Icon Type</label>
+                {{ form.icon }}
+                {% if form.icon.errors %}
+                  <ul class="db-field-errors">{% for e in form.icon.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+                {% endif %}
+              </div>
+              <div class="db-field">
+                <label class="db-label">Label <span class="required">*</span></label>
+                <div class="trans-tabs">
+                  <div class="trans-tabs__nav">
+                    <button type="button" class="trans-tab-btn active" data-lang="en">EN</button>
+                    <button type="button" class="trans-tab-btn" data-lang="az">AZ</button>
+                    <button type="button" class="trans-tab-btn" data-lang="ru">RU</button>
+                  </div>
+                  <div class="trans-tab-pane active" data-pane="en">{{ form.name }}{% if form.name.errors %}<ul class="db-field-errors">{% for e in form.name.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}</div>
+                  <div class="trans-tab-pane" data-pane="az">{{ form.name_az }}</div>
+                  <div class="trans-tab-pane" data-pane="ru">{{ form.name_ru }}</div>
+                </div>
+              </div>
+              <div class="db-field db-field--full">
+                <label class="db-label">Description</label>
+                <div class="trans-tabs">
+                  <div class="trans-tabs__nav">
+                    <button type="button" class="trans-tab-btn active" data-lang="en">EN</button>
+                    <button type="button" class="trans-tab-btn" data-lang="az">AZ</button>
+                    <button type="button" class="trans-tab-btn" data-lang="ru">RU</button>
+                  </div>
+                  <div class="trans-tab-pane active" data-pane="en">{{ form.description }}{% if form.description.errors %}<ul class="db-field-errors">{% for e in form.description.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}</div>
+                  <div class="trans-tab-pane" data-pane="az">{{ form.description_az }}</div>
+                  <div class="trans-tab-pane" data-pane="ru">{{ form.description_ru }}</div>
+                </div>
+              </div>
+              <div class="db-field db-field--full">
+                <label class="db-label" for="{{ form.info_section_url.id_for_label }}">Link URL (optional)</label>
+                {{ form.info_section_url }}
+                {% if form.info_section_url.errors %}
+                  <ul class="db-field-errors">{% for e in form.info_section_url.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      {% else %}
+        <div class="db-formset-add">
+          <p class="db-formset-add__title">Add New Info Item</p>
+          {{ form.id }}
+          <div class="db-form-grid">
+            <div class="db-field">
+              <label class="db-label" for="{{ form.icon.id_for_label }}">Icon Type</label>
+              {{ form.icon }}
+              {% if form.icon.errors %}
+                <ul class="db-field-errors">{% for e in form.icon.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+              {% endif %}
+            </div>
+            <div class="db-field">
+              <label class="db-label">Label</label>
+              <div class="trans-tabs">
+                <div class="trans-tabs__nav">
+                  <button type="button" class="trans-tab-btn active" data-lang="en">EN</button>
+                  <button type="button" class="trans-tab-btn" data-lang="az">AZ</button>
+                  <button type="button" class="trans-tab-btn" data-lang="ru">RU</button>
+                </div>
+                <div class="trans-tab-pane active" data-pane="en">{{ form.name }}{% if form.name.errors %}<ul class="db-field-errors">{% for e in form.name.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}</div>
+                <div class="trans-tab-pane" data-pane="az">{{ form.name_az }}</div>
+                <div class="trans-tab-pane" data-pane="ru">{{ form.name_ru }}</div>
+              </div>
+            </div>
+            <div class="db-field db-field--full">
+              <label class="db-label">Description</label>
+              <div class="trans-tabs">
+                <div class="trans-tabs__nav">
+                  <button type="button" class="trans-tab-btn active" data-lang="en">EN</button>
+                  <button type="button" class="trans-tab-btn" data-lang="az">AZ</button>
+                  <button type="button" class="trans-tab-btn" data-lang="ru">RU</button>
+                </div>
+                <div class="trans-tab-pane active" data-pane="en">{{ form.description }}{% if form.description.errors %}<ul class="db-field-errors">{% for e in form.description.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}</div>
+                <div class="trans-tab-pane" data-pane="az">{{ form.description_az }}</div>
+                <div class="trans-tab-pane" data-pane="ru">{{ form.description_ru }}</div>
+              </div>
+            </div>
+            <div class="db-field db-field--full">
+              <label class="db-label" for="{{ form.info_section_url.id_for_label }}">Link URL (optional)</label>
+              {{ form.info_section_url }}
+              {% if form.info_section_url.errors %}
+                <ul class="db-field-errors">{% for e in form.info_section_url.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  <div class="db-form-actions">
+    <button type="submit" class="db-btn db-btn--primary">💾 Save Info Items</button>
+    <a href="{% url 'dashboard:home' %}" class="db-btn db-btn--ghost">Back to Dashboard</a>
+  </div>
+
+</form>
+
+{% endblock %}

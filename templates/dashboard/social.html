@@ -1,0 +1,100 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+
+{% block content %}
+
+<div class="db-page-header">
+  <div>
+    <h2 class="db-page-header__title">Social Media</h2>
+    <p class="db-page-header__sub">Manage your social media links (max 3). Uncheck "Active" to hide a link on the site.</p>
+  </div>
+</div>
+
+<form method="post" enctype="multipart/form-data" novalidate>
+  {% csrf_token %}
+  {{ formset.management_form }}
+
+  {% if formset.non_form_errors %}
+    <div class="db-non-field-errors">
+      {% for error in formset.non_form_errors %}{{ error }}{% endfor %}
+    </div>
+  {% endif %}
+
+  <div class="db-formset">
+    {% for form in formset %}
+      {% if form.instance.pk %}
+        <div class="db-formset-item {% if form.DELETE.value %}db-formset-item--deleted{% endif %}">
+          <div class="db-formset-item__header">
+            <span class="db-formset-item__num">
+              {{ form.instance.social_media_name|default:"Social Link" }}
+            </span>
+            <label class="db-delete-row">
+              {{ form.DELETE }}
+              <span>Delete</span>
+            </label>
+          </div>
+          <div class="db-formset-item__body">
+            {{ form.id }}
+            <div class="db-form-grid">
+              <div class="db-field">
+                <label class="db-label" for="{{ form.social_media_name.id_for_label }}">Platform Name <span class="required">*</span></label>
+                {{ form.social_media_name }}
+                {% if form.social_media_name.errors %}
+                  <ul class="db-field-errors">{% for e in form.social_media_name.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+                {% endif %}
+              </div>
+              <div class="db-field">
+                <label class="db-label" for="{{ form.social_media_url.id_for_label }}">Profile URL <span class="required">*</span></label>
+                {{ form.social_media_url }}
+                {% if form.social_media_url.errors %}
+                  <ul class="db-field-errors">{% for e in form.social_media_url.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+                {% endif %}
+              </div>
+              <div class="db-field" style="grid-column:1/-1;">
+                <label class="db-checkbox-label">
+                  {{ form.is_active }}
+                  <span>Active (visible on site)</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% else %}
+        <div class="db-formset-add">
+          <p class="db-formset-add__title">Add New Social Link</p>
+          {{ form.id }}
+          <div class="db-form-grid">
+            <div class="db-field">
+              <label class="db-label" for="{{ form.social_media_name.id_for_label }}">Platform Name</label>
+              {{ form.social_media_name }}
+              {% if form.social_media_name.errors %}
+                <ul class="db-field-errors">{% for e in form.social_media_name.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+              {% endif %}
+            </div>
+            <div class="db-field">
+              <label class="db-label" for="{{ form.social_media_url.id_for_label }}">Profile URL</label>
+              {{ form.social_media_url }}
+              {% if form.social_media_url.errors %}
+                <ul class="db-field-errors">{% for e in form.social_media_url.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+              {% endif %}
+            </div>
+            <div class="db-field" style="grid-column:1/-1;">
+              <label class="db-checkbox-label">
+                {{ form.is_active }}
+                <span>Active (visible on site)</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  <div class="db-form-actions">
+    <button type="submit" class="db-btn db-btn--primary">💾 Save Social Links</button>
+    <a href="{% url 'dashboard:home' %}" class="db-btn db-btn--ghost">Back to Dashboard</a>
+  </div>
+
+</form>
+
+{% endblock %}

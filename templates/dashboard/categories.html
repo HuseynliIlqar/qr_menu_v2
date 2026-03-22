@@ -1,0 +1,110 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+
+{% block content %}
+
+<div class="db-page-header">
+  <div>
+    <h2 class="db-page-header__title">Menu Categories</h2>
+    <p class="db-page-header__sub">Manage menu categories (max 10). Use sort order to control display order.</p>
+  </div>
+</div>
+
+<form method="post" enctype="multipart/form-data" novalidate>
+  {% csrf_token %}
+  {{ formset.management_form }}
+
+  {% if formset.non_form_errors %}
+    <div class="db-non-field-errors">
+      {% for error in formset.non_form_errors %}{{ error }}{% endfor %}
+    </div>
+  {% endif %}
+
+  <div class="db-formset">
+    {% for form in formset %}
+      {% if form.instance.pk %}
+        <div class="db-formset-item {% if form.DELETE.value %}db-formset-item--deleted{% endif %}">
+          <div class="db-formset-item__header">
+            <span class="db-formset-item__num">{{ form.instance.category_name|default:"Category" }}</span>
+            <label class="db-delete-row">
+              {{ form.DELETE }}
+              <span>Delete</span>
+            </label>
+          </div>
+          <div class="db-formset-item__body">
+            {{ form.id }}
+            <div class="db-form-grid db-form-grid--3">
+              <div class="db-field">
+                <label class="db-label">Category Name <span class="required">*</span></label>
+                <div class="trans-tabs">
+                  <div class="trans-tabs__nav">
+                    <button type="button" class="trans-tab-btn active" data-lang="en">EN</button>
+                    <button type="button" class="trans-tab-btn" data-lang="az">AZ</button>
+                    <button type="button" class="trans-tab-btn" data-lang="ru">RU</button>
+                  </div>
+                  <div class="trans-tab-pane active" data-pane="en">{{ form.category_name }}{% if form.category_name.errors %}<ul class="db-field-errors">{% for e in form.category_name.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}</div>
+                  <div class="trans-tab-pane" data-pane="az">{{ form.category_name_az }}{% if form.category_name_az.errors %}<ul class="db-field-errors">{% for e in form.category_name_az.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}</div>
+                  <div class="trans-tab-pane" data-pane="ru">{{ form.category_name_ru }}{% if form.category_name_ru.errors %}<ul class="db-field-errors">{% for e in form.category_name_ru.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}</div>
+                </div>
+              </div>
+              <div class="db-field">
+                <label class="db-label" for="{{ form.sort_order.id_for_label }}">Sort Order</label>
+                {{ form.sort_order }}
+                {% if form.sort_order.errors %}
+                  <ul class="db-field-errors">{% for e in form.sort_order.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+                {% endif %}
+              </div>
+              <div class="db-field" style="justify-content:flex-end; padding-top:22px;">
+                <label class="db-checkbox-label">
+                  {{ form.is_active }}
+                  <span>Active</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% else %}
+        <div class="db-formset-add">
+          <p class="db-formset-add__title">Add New Category</p>
+          {{ form.id }}
+          <div class="db-form-grid db-form-grid--3">
+            <div class="db-field">
+              <label class="db-label">Category Name</label>
+              <div class="trans-tabs">
+                <div class="trans-tabs__nav">
+                  <button type="button" class="trans-tab-btn active" data-lang="en">EN</button>
+                  <button type="button" class="trans-tab-btn" data-lang="az">AZ</button>
+                  <button type="button" class="trans-tab-btn" data-lang="ru">RU</button>
+                </div>
+                <div class="trans-tab-pane active" data-pane="en">{{ form.category_name }}{% if form.category_name.errors %}<ul class="db-field-errors">{% for e in form.category_name.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}</div>
+                <div class="trans-tab-pane" data-pane="az">{{ form.category_name_az }}</div>
+                <div class="trans-tab-pane" data-pane="ru">{{ form.category_name_ru }}</div>
+              </div>
+            </div>
+            <div class="db-field">
+              <label class="db-label" for="{{ form.sort_order.id_for_label }}">Sort Order</label>
+              {{ form.sort_order }}
+              {% if form.sort_order.errors %}
+                <ul class="db-field-errors">{% for e in form.sort_order.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+              {% endif %}
+            </div>
+            <div class="db-field" style="justify-content:flex-end; padding-top:22px;">
+              <label class="db-checkbox-label">
+                {{ form.is_active }}
+                <span>Active</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  <div class="db-form-actions">
+    <button type="submit" class="db-btn db-btn--primary">💾 Save Categories</button>
+    <a href="{% url 'dashboard:home' %}" class="db-btn db-btn--ghost">Back to Dashboard</a>
+  </div>
+
+</form>
+
+{% endblock %}

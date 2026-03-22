@@ -1,0 +1,239 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+
+{% block content %}
+
+<div class="db-page-header">
+  <div>
+    <h2 class="db-page-header__title">Restaurant Info</h2>
+    <p class="db-page-header__sub">Edit your restaurant profile, hero section, about us, and footer details.</p>
+  </div>
+</div>
+
+<form method="post" enctype="multipart/form-data" novalidate>
+  {% csrf_token %}
+
+  <!-- Non-field errors -->
+  {% if form.non_field_errors %}
+    <div class="db-non-field-errors">
+      {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+    </div>
+  {% endif %}
+
+  <!-- ── Fieldset 1: Restaurant & Hero ── -->
+  <fieldset class="db-fieldset db-form-section">
+    <legend>Restaurant &amp; Hero</legend>
+    <div class="db-form-grid">
+
+      <!-- Restaurant Name -->
+      <div class="db-field">
+        <label class="db-label" for="{{ form.restoran_name.id_for_label }}">
+          Restaurant Name <span class="required">*</span>
+        </label>
+        {{ form.restoran_name }}
+        {% if form.restoran_name.errors %}
+          <ul class="db-field-errors">{% for e in form.restoran_name.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+
+      <!-- Reserve URL -->
+      <div class="db-field">
+        <label class="db-label" for="{{ form.restoran_reserve_url.id_for_label }}">
+          Reservation URL <span class="required">*</span>
+        </label>
+        {{ form.restoran_reserve_url }}
+        {% if form.restoran_reserve_url.errors %}
+          <ul class="db-field-errors">{% for e in form.restoran_reserve_url.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+
+      <!-- Hero Headline -->
+      <div class="db-field">
+        <label class="db-label">Hero Headline <span class="required">*</span></label>
+        <div class="trans-tabs">
+          <div class="trans-tabs__nav">
+            <button type="button" class="trans-tab-btn active" data-lang="en">EN</button>
+            <button type="button" class="trans-tab-btn" data-lang="az">AZ</button>
+            <button type="button" class="trans-tab-btn" data-lang="ru">RU</button>
+          </div>
+          <div class="trans-tab-pane active" data-pane="en">{{ form.h1_text }}{% if form.h1_text.errors %}<ul class="db-field-errors">{% for e in form.h1_text.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}</div>
+          <div class="trans-tab-pane" data-pane="az">{{ form.h1_text_az }}{% if form.h1_text_az.errors %}<ul class="db-field-errors">{% for e in form.h1_text_az.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}</div>
+          <div class="trans-tab-pane" data-pane="ru">{{ form.h1_text_ru }}{% if form.h1_text_ru.errors %}<ul class="db-field-errors">{% for e in form.h1_text_ru.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}</div>
+        </div>
+      </div>
+
+      <!-- Hero Sub-headline -->
+      <div class="db-field">
+        <label class="db-label">Hero Sub-headline <span class="required">*</span></label>
+        <div class="trans-tabs">
+          <div class="trans-tabs__nav">
+            <button type="button" class="trans-tab-btn active" data-lang="en">EN</button>
+            <button type="button" class="trans-tab-btn" data-lang="az">AZ</button>
+            <button type="button" class="trans-tab-btn" data-lang="ru">RU</button>
+          </div>
+          <div class="trans-tab-pane active" data-pane="en">{{ form.h1_sub_text }}{% if form.h1_sub_text.errors %}<ul class="db-field-errors">{% for e in form.h1_sub_text.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}</div>
+          <div class="trans-tab-pane" data-pane="az">{{ form.h1_sub_text_az }}{% if form.h1_sub_text_az.errors %}<ul class="db-field-errors">{% for e in form.h1_sub_text_az.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}</div>
+          <div class="trans-tab-pane" data-pane="ru">{{ form.h1_sub_text_ru }}{% if form.h1_sub_text_ru.errors %}<ul class="db-field-errors">{% for e in form.h1_sub_text_ru.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}</div>
+        </div>
+      </div>
+
+      <!-- Restaurant Icon -->
+      <div class="db-field db-field--full">
+        <label class="db-label">Restaurant Icon / Logo</label>
+        {% if form.instance.pk and form.instance.restoran_icon_src %}
+          <div class="db-img-preview"><img src="{{ form.instance.restoran_icon_src }}" alt="Current icon" /><span class="db-img-preview__label">Current</span></div>
+        {% endif %}
+        <div class="db-img-or-url">
+          <div class="db-img-or-url__side">
+            <span class="db-img-or-url__sublabel">Upload file</span>
+            {{ form.restoran_icon }}
+            {% if form.restoran_icon.errors %}<ul class="db-field-errors">{% for e in form.restoran_icon.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+          </div>
+          <div class="db-img-or-url__divider">or</div>
+          <div class="db-img-or-url__side">
+            <span class="db-img-or-url__sublabel">Paste image URL</span>
+            {{ form.restoran_icon_url }}
+            {% if form.restoran_icon_url.errors %}<ul class="db-field-errors">{% for e in form.restoran_icon_url.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </fieldset>
+
+  <!-- ── Fieldset 2: About Us ── -->
+  <fieldset class="db-fieldset db-form-section">
+    <legend>About Us</legend>
+    <div class="db-form-grid">
+
+      <!-- About Title -->
+      <div class="db-field db-field--full">
+        <label class="db-label">About Us Title <span class="required">*</span></label>
+        <div class="trans-tabs">
+          <div class="trans-tabs__nav">
+            <button type="button" class="trans-tab-btn active" data-lang="en">EN</button>
+            <button type="button" class="trans-tab-btn" data-lang="az">AZ</button>
+            <button type="button" class="trans-tab-btn" data-lang="ru">RU</button>
+          </div>
+          <div class="trans-tab-pane active" data-pane="en">{{ form.about_us_title }}{% if form.about_us_title.errors %}<ul class="db-field-errors">{% for e in form.about_us_title.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}</div>
+          <div class="trans-tab-pane" data-pane="az">{{ form.about_us_title_az }}{% if form.about_us_title_az.errors %}<ul class="db-field-errors">{% for e in form.about_us_title_az.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}</div>
+          <div class="trans-tab-pane" data-pane="ru">{{ form.about_us_title_ru }}{% if form.about_us_title_ru.errors %}<ul class="db-field-errors">{% for e in form.about_us_title_ru.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}</div>
+        </div>
+      </div>
+
+      <!-- About Text -->
+      <div class="db-field db-field--full">
+        <label class="db-label">About Us Text <span class="required">*</span></label>
+        <div class="trans-tabs">
+          <div class="trans-tabs__nav">
+            <button type="button" class="trans-tab-btn active" data-lang="en">EN</button>
+            <button type="button" class="trans-tab-btn" data-lang="az">AZ</button>
+            <button type="button" class="trans-tab-btn" data-lang="ru">RU</button>
+          </div>
+          <div class="trans-tab-pane active" data-pane="en">{{ form.about_us }}{% if form.about_us.errors %}<ul class="db-field-errors">{% for e in form.about_us.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}</div>
+          <div class="trans-tab-pane" data-pane="az">{{ form.about_us_az }}{% if form.about_us_az.errors %}<ul class="db-field-errors">{% for e in form.about_us_az.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}</div>
+          <div class="trans-tab-pane" data-pane="ru">{{ form.about_us_ru }}{% if form.about_us_ru.errors %}<ul class="db-field-errors">{% for e in form.about_us_ru.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}</div>
+        </div>
+      </div>
+
+      <!-- About Main Image -->
+      <div class="db-field">
+        <label class="db-label">Main About Image</label>
+        {% if form.instance.pk and form.instance.about_us_image_main_src %}
+          <div class="db-img-preview db-img-preview--wide"><img src="{{ form.instance.about_us_image_main_src }}" alt="Main about image" /><span class="db-img-preview__label">Current</span></div>
+        {% endif %}
+        <div class="db-img-or-url">
+          <div class="db-img-or-url__side">
+            <span class="db-img-or-url__sublabel">Upload file</span>
+            {{ form.about_us_image_main }}
+          </div>
+          <div class="db-img-or-url__divider">or</div>
+          <div class="db-img-or-url__side">
+            <span class="db-img-or-url__sublabel">Paste image URL</span>
+            {{ form.about_us_image_main_url }}
+          </div>
+        </div>
+      </div>
+
+      <!-- About Accent Image -->
+      <div class="db-field">
+        <label class="db-label">Accent About Image</label>
+        {% if form.instance.pk and form.instance.about_us_image_accent_src %}
+          <div class="db-img-preview db-img-preview--wide"><img src="{{ form.instance.about_us_image_accent_src }}" alt="Accent about image" /><span class="db-img-preview__label">Current</span></div>
+        {% endif %}
+        <div class="db-img-or-url">
+          <div class="db-img-or-url__side">
+            <span class="db-img-or-url__sublabel">Upload file</span>
+            {{ form.about_us_image_accent }}
+          </div>
+          <div class="db-img-or-url__divider">or</div>
+          <div class="db-img-or-url__side">
+            <span class="db-img-or-url__sublabel">Paste image URL</span>
+            {{ form.about_us_image_accent_url }}
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </fieldset>
+
+  <!-- ── Fieldset 3: Footer ── -->
+  <fieldset class="db-fieldset db-form-section">
+    <legend>Footer</legend>
+    <div class="db-form-grid">
+
+      <!-- Footer Text -->
+      <div class="db-field db-field--full">
+        <label class="db-label" for="{{ form.footer_text.id_for_label }}">
+          Footer Tagline <span class="required">*</span>
+        </label>
+        {{ form.footer_text }}
+        {% if form.footer_text.errors %}
+          <ul class="db-field-errors">{% for e in form.footer_text.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+
+      <!-- Footer Address -->
+      <div class="db-field">
+        <label class="db-label" for="{{ form.footer_adress.id_for_label }}">
+          Address <span class="required">*</span>
+        </label>
+        {{ form.footer_adress }}
+        {% if form.footer_adress.errors %}
+          <ul class="db-field-errors">{% for e in form.footer_adress.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+
+      <!-- Footer Phone -->
+      <div class="db-field">
+        <label class="db-label" for="{{ form.footer_phone.id_for_label }}">
+          Phone <span class="required">*</span>
+        </label>
+        {{ form.footer_phone }}
+        {% if form.footer_phone.errors %}
+          <ul class="db-field-errors">{% for e in form.footer_phone.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+
+      <!-- Footer Open Time -->
+      <div class="db-field db-field--full">
+        <label class="db-label" for="{{ form.footer_open_time.id_for_label }}">
+          Opening Hours <span class="required">*</span>
+        </label>
+        {{ form.footer_open_time }}
+        {% if form.footer_open_time.errors %}
+          <ul class="db-field-errors">{% for e in form.footer_open_time.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+
+    </div>
+  </fieldset>
+
+  <div class="db-form-actions">
+    <button type="submit" class="db-btn db-btn--primary">💾 Save Changes</button>
+    <a href="{% url 'dashboard:home' %}" class="db-btn db-btn--ghost">Cancel</a>
+  </div>
+
+</form>
+
+{% endblock %}

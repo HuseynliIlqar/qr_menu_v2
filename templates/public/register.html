@@ -1,0 +1,129 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QRMenu — {% trans "Register" %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #18181b; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px 16px; }
+    .top-bar { width: 100%; max-width: 480px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .logo { display: flex; align-items: center; gap: 8px; color: #fff; font-size: 20px; font-weight: 800; text-decoration: none; }
+    .logo span { color: #f59e0b; }
+    /* Lang switcher */
+    .lang-form { margin: 0; }
+    .lang-sw { display: flex; gap: 2px; background: rgba(255,255,255,.08); border-radius: 5px; padding: 2px; }
+    .lang-sw button { padding: 3px 7px; font-size: 10.5px; font-weight: 700; border: none; border-radius: 3px; background: transparent; color: rgba(255,255,255,.6); cursor: pointer; font-family: inherit; letter-spacing: .04em; transition: all .15s; }
+    .lang-sw button.on { background: #f59e0b; color: #fff; }
+    .lang-sw button:hover:not(.on) { background: rgba(255,255,255,.15); color: #fff; }
+    /* Card */
+    .card { background: #fff; border-radius: 14px; padding: 44px 40px; width: 100%; max-width: 480px; box-shadow: 0 24px 64px rgba(0,0,0,.45); }
+    .card-title { font-size: 22px; font-weight: 800; color: #18181b; margin-bottom: 4px; }
+    .card-sub { font-size: 13px; color: #a1a1aa; margin-bottom: 28px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 16px; }
+    label { font-size: 12.5px; font-weight: 600; color: #52525b; }
+    label .req { color: #ef4444; }
+    input[type="text"], input[type="email"], input[type="password"] { width: 100%; padding: 10px 14px; font-family: inherit; font-size: 14px; color: #18181b; background: #fff; border: 1px solid #e4e4e7; border-radius: 7px; outline: none; transition: border-color .15s, box-shadow .15s; }
+    input:focus { border-color: #f59e0b; box-shadow: 0 0 0 3px rgba(245,158,11,.14); }
+    .subdomain-wrap { display: flex; align-items: center; border: 1px solid #e4e4e7; border-radius: 7px; overflow: hidden; transition: border-color .15s, box-shadow .15s; }
+    .subdomain-wrap:focus-within { border-color: #f59e0b; box-shadow: 0 0 0 3px rgba(245,158,11,.14); }
+    .subdomain-wrap input { border: none; border-radius: 0; box-shadow: none; flex: 1; min-width: 0; }
+    .subdomain-wrap input:focus { box-shadow: none; }
+    .subdomain-suffix { background: #f4f4f5; padding: 10px 12px; font-size: 13px; color: #71717a; white-space: nowrap; border-left: 1px solid #e4e4e7; }
+    .hint { font-size: 11.5px; color: #a1a1aa; margin-top: 3px; }
+    .error-list { background: #fef2f2; border: 1px solid #fca5a5; border-radius: 6px; padding: 8px 12px; color: #991b1b; font-size: 12.5px; list-style: none; margin-top: 4px; }
+    .error-list li { margin-bottom: 2px; }
+    .non-field-errors { background: #fef2f2; border: 1px solid #fca5a5; border-radius: 8px; padding: 10px 14px; color: #991b1b; font-size: 13px; margin-bottom: 18px; }
+    .divider { border: none; border-top: 1px solid #e4e4e7; margin: 20px 0; }
+    .btn-submit { display: block; width: 100%; padding: 12px; background: #f59e0b; color: #fff; font-family: inherit; font-size: 15px; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; letter-spacing: .01em; transition: background .15s, box-shadow .15s; margin-top: 8px; }
+    .btn-submit:hover { background: #d97706; box-shadow: 0 4px 14px rgba(245,158,11,.35); }
+    .login-link { text-align: center; margin-top: 20px; font-size: 13px; color: #71717a; }
+    .login-link a { color: #f59e0b; font-weight: 600; text-decoration: none; }
+    .login-link a:hover { text-decoration: underline; }
+    @media (max-width: 520px) { .card { padding: 28px 20px; } .form-row { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+{% get_current_language as cur_lang %}
+
+<div class="top-bar">
+  <a href="/" class="logo">🍽️ <span>QR</span>Menu</a>
+  <form action="{% url 'set_language' %}" method="post" class="lang-form">
+    {% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
+    <div class="lang-sw">
+      <button type="submit" name="language" value="az" class="{% if cur_lang == 'az' %}on{% endif %}">AZ</button>
+      <button type="submit" name="language" value="en" class="{% if cur_lang == 'en' %}on{% endif %}">EN</button>
+      <button type="submit" name="language" value="ru" class="{% if cur_lang == 'ru' %}on{% endif %}">RU</button>
+    </div>
+  </form>
+</div>
+
+<div class="card">
+  <p class="card-title">{% trans "Create your restaurant" %}</p>
+  <p class="card-sub">{% trans "Takes less than 2 minutes. No credit card required." %}</p>
+
+  {% if form.non_field_errors %}
+    <div class="non-field-errors">{% for e in form.non_field_errors %}{{ e }}{% endfor %}</div>
+  {% endif %}
+
+  <form method="post" novalidate>
+    {% csrf_token %}
+
+    <div class="form-group">
+      <label for="{{ form.restaurant_name.id_for_label }}">{% trans "Restaurant Name" %} <span class="req">*</span></label>
+      {{ form.restaurant_name }}
+      {% if form.restaurant_name.errors %}<ul class="error-list">{% for e in form.restaurant_name.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+    </div>
+
+    <div class="form-group">
+      <label for="id_subdomain">{% trans "Your Menu URL" %} <span class="req">*</span></label>
+      <div class="subdomain-wrap">
+        <input type="text" id="id_subdomain" name="subdomain" value="{{ form.subdomain.value|default:'' }}" placeholder="myrestaurant" autocomplete="off" spellcheck="false" />
+        <span class="subdomain-suffix">.{{ base_domain }}</span>
+      </div>
+      <span class="hint">{% trans "lowercase letters, numbers and hyphens only. Min 2 characters." %}</span>
+      {% if form.subdomain.errors %}<ul class="error-list">{% for e in form.subdomain.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+    </div>
+
+    <hr class="divider" />
+
+    <div class="form-row">
+      <div class="form-group" style="margin-bottom:0">
+        <label for="{{ form.username.id_for_label }}">{% trans "Username" %} <span class="req">*</span></label>
+        {{ form.username }}
+        {% if form.username.errors %}<ul class="error-list">{% for e in form.username.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label for="{{ form.email.id_for_label }}">{% trans "Email" %} <span class="req">*</span></label>
+        {{ form.email }}
+        {% if form.email.errors %}<ul class="error-list">{% for e in form.email.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+      </div>
+    </div>
+
+    <div class="form-row" style="margin-top:16px">
+      <div class="form-group" style="margin-bottom:0">
+        <label for="{{ form.password1.id_for_label }}">{% trans "Password" %} <span class="req">*</span></label>
+        {{ form.password1 }}
+        {% if form.password1.errors %}<ul class="error-list">{% for e in form.password1.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label for="{{ form.password2.id_for_label }}">{% trans "Confirm Password" %} <span class="req">*</span></label>
+        {{ form.password2 }}
+        {% if form.password2.errors %}<ul class="error-list">{% for e in form.password2.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+      </div>
+    </div>
+
+    <button type="submit" class="btn-submit">{% trans "Create My Restaurant →" %}</button>
+  </form>
+
+  <p class="login-link">{% trans "Already have an account?" %} <a href="/login/">{% trans "Sign in" %}</a></p>
+</div>
+
+</body>
+</html>

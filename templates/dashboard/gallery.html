@@ -1,0 +1,84 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+
+{% block content %}
+
+<div class="db-page-header">
+  <div>
+    <h2 class="db-page-header__title">Restaurant Gallery</h2>
+    <p class="db-page-header__sub">Manage gallery photos (max 5). Upload a file or paste an image URL.</p>
+  </div>
+</div>
+
+<form method="post" enctype="multipart/form-data" novalidate>
+  {% csrf_token %}
+  {{ formset.management_form }}
+
+  {% if formset.non_form_errors %}
+    <div class="db-non-field-errors">{% for e in formset.non_form_errors %}{{ e }}{% endfor %}</div>
+  {% endif %}
+
+  <div class="db-formset">
+    {% for form in formset %}
+      {% if form.instance.pk %}
+        <div class="db-formset-item {% if form.DELETE.value %}db-formset-item--deleted{% endif %}">
+          <div class="db-formset-item__header">
+            <span class="db-formset-item__num">Photo {{ forloop.counter }}</span>
+            <label class="db-delete-row">{{ form.DELETE }}<span>Delete</span></label>
+          </div>
+          <div class="db-formset-item__body">
+            {{ form.id }}
+            <div class="db-field db-field--full">
+              <label class="db-label">Gallery Photo</label>
+              {% if form.instance.galery_image_src %}
+                <div class="db-img-preview db-img-preview--wide">
+                  <img src="{{ form.instance.galery_image_src }}" alt="Photo {{ forloop.counter }}" />
+                  <span class="db-img-preview__label">Current</span>
+                </div>
+              {% endif %}
+              <div class="db-img-or-url">
+                <div class="db-img-or-url__side">
+                  <span class="db-img-or-url__sublabel">Upload file</span>
+                  {{ form.galery_image }}
+                  {% if form.galery_image.errors %}<ul class="db-field-errors">{% for e in form.galery_image.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+                <div class="db-img-or-url__divider">or</div>
+                <div class="db-img-or-url__side">
+                  <span class="db-img-or-url__sublabel">Paste image URL</span>
+                  {{ form.galery_image_url }}
+                  {% if form.galery_image_url.errors %}<ul class="db-field-errors">{% for e in form.galery_image_url.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% else %}
+        <div class="db-formset-add">
+          <p class="db-formset-add__title">Add New Photo</p>
+          {{ form.id }}
+          <div class="db-field db-field--full">
+            <label class="db-label">Gallery Photo</label>
+            <div class="db-img-or-url">
+              <div class="db-img-or-url__side">
+                <span class="db-img-or-url__sublabel">Upload file</span>
+                {{ form.galery_image }}
+              </div>
+              <div class="db-img-or-url__divider">or</div>
+              <div class="db-img-or-url__side">
+                <span class="db-img-or-url__sublabel">Paste image URL</span>
+                {{ form.galery_image_url }}
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  <div class="db-form-actions">
+    <button type="submit" class="db-btn db-btn--primary">Save Gallery</button>
+    <a href="{% url 'dashboard:home' %}" class="db-btn db-btn--ghost">Back</a>
+  </div>
+</form>
+
+{% endblock %}

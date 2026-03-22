@@ -1,11 +1,11 @@
-{% load static %}
+{% load static i18n %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ LANGUAGE_CODE }}">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Delizioso — Fine Italian Dining</title>
+    <title>{% if main %}{{ main.restoran_name }}{% else %}QR Menu{% endif %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -16,11 +16,15 @@
 
 <body>
 
-    <!-- ── NAVBAR ─────────────────────────────────────────── -->
+    <!-- ── NAVBAR ─────────────────────────────────────────────── -->
     <nav class="navbar">
         <div class="navbar-inner">
             <a href="#" class="navbar-logo">
                 <div class="logo-icon">
+                    {% if main and main.restoran_icon_src %}
+                    <img src="{{ main.restoran_icon_src }}" alt="{{ main.restoran_name }}" width="18" height="18"
+                        style="object-fit:contain;">
+                    {% else %}
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
                         <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
@@ -28,86 +32,119 @@
                         <line x1="10" y1="1" x2="10" y2="4"></line>
                         <line x1="14" y1="1" x2="14" y2="4"></line>
                     </svg>
+                    {% endif %}
                 </div>
-                <span class="logo-text">Delizioso</span>
+                <span class="logo-text">{% if main %}{{ main.restoran_name }}{% endif %}</span>
             </a>
 
             <ul class="navbar-nav">
-                <li><a href="#about">About</a></li>
-                <li><a href="#menu">Menu</a></li>
-                <li><a href="#gallery">Gallery</a></li>
-                <li><a href="#contact">Contact</a></li>
+                <li><a href="#about">{% trans "About" %}</a></li>
+                <li><a href="#menu">{% trans "Menu" %}</a></li>
+                <li><a href="#gallery">{% trans "Gallery" %}</a></li>
+                <li><a href="#contact">{% trans "Contact" %}</a></li>
             </ul>
 
             <div class="navbar-right">
+                {% get_current_language as cur_lang %}
+                <form action="{% url 'set_language' %}" method="post" style="margin:0">
+                    {% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
+                    <div style="display:flex;gap:2px;background:#e8e0d5;border-radius:6px;padding:2px;border:1px solid #d5cec4;">
+                        <button type="submit" name="language" value="az"
+                            style="padding:4px 9px;font-size:10.5px;font-weight:700;border:none;border-radius:4px;background:{% if cur_lang == 'az' %}#c9933a{% else %}transparent{% endif %};color:{% if cur_lang == 'az' %}#fff{% else %}#7a6e64{% endif %};cursor:pointer;font-family:inherit;letter-spacing:.04em;transition:all .15s;">AZ</button>
+                        <button type="submit" name="language" value="en"
+                            style="padding:4px 9px;font-size:10.5px;font-weight:700;border:none;border-radius:4px;background:{% if cur_lang == 'en' %}#c9933a{% else %}transparent{% endif %};color:{% if cur_lang == 'en' %}#fff{% else %}#7a6e64{% endif %};cursor:pointer;font-family:inherit;letter-spacing:.04em;transition:all .15s;">EN</button>
+                        <button type="submit" name="language" value="ru"
+                            style="padding:4px 9px;font-size:10.5px;font-weight:700;border:none;border-radius:4px;background:{% if cur_lang == 'ru' %}#c9933a{% else %}transparent{% endif %};color:{% if cur_lang == 'ru' %}#fff{% else %}#7a6e64{% endif %};cursor:pointer;font-family:inherit;letter-spacing:.04em;transition:all .15s;">RU</button>
+                    </div>
+                </form>
                 <div class="status-badge open" id="status-badge">
                     <span class="status-dot"></span>
-                    <span id="status-text">Open Now</span>
+                    <span id="status-text">{% trans "Open Now" %}</span>
                 </div>
                 <div class="social-links">
-                    <a href="https://instagram.com" target="_blank" class="social-link" aria-label="Instagram">
+                    {% if main %}
+                    {% for social in main.socials %}
+                    <a href="{{ social.social_media_url }}" target="_blank" class="social-link"
+                        aria-label="{{ social.social_media_name }}">
+                        {% with name=social.social_media_name|lower %}
+                        {% if name == 'instagram' %}
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2">
                             <rect x="2" y="2" width="20" height="20" rx="5"></rect>
                             <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
                             <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
                         </svg>
-                    </a>
-                    <a href="https://tiktok.com" target="_blank" class="social-link" aria-label="TikTok">
+                        {% elif name == 'tiktok' %}
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
                             <path
                                 d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
                         </svg>
-                    </a>
-                    <a href="https://wa.me/15551234567" target="_blank" class="social-link" aria-label="WhatsApp">
+                        {% elif name == 'whatsapp' %}
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2">
                             <path
                                 d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z">
                             </path>
                         </svg>
+                        {% elif name == 'facebook' %}
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
+                        </svg>
+                        {% else %}
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="2" y1="12" x2="22" y2="12"></line>
+                            <path
+                                d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z">
+                            </path>
+                        </svg>
+                        {% endif %}
+                        {% endwith %}
                     </a>
+                    {% endfor %}
+                    {% endif %}
                 </div>
             </div>
         </div>
     </nav>
 
-    <!-- ── HERO ───────────────────────────────────────────── -->
+    <!-- ── HERO ───────────────────────────────────────────────── -->
     <section class="hero">
         <div class="hero-slides">
+            {% if main and main.sliders %}
+            {% for slider in main.sliders %}
+            <div class="hero-slide {% if forloop.first %}active{% endif %}">
+                <img src="{{ slider.slide_image_src }}" alt="Slide {{ forloop.counter }}">
+            </div>
+            {% endfor %}
+            {% else %}
             <div class="hero-slide active">
-                <img src="https://images.unsplash.com/photo-1632898658030-ead731d252d4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxyZXN0YXVyYW50JTIwZm9vZCUyMGJ1cmdlcnxlbnwxfHx8fDE3NjcxODA3NjZ8MA&ixlib=rb-4.1.0&q=80&w=1080"
-                    alt="Delicious Burgers">
+                <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1080" alt="Restaurant">
             </div>
-            <div class="hero-slide">
-                <img src="https://images.unsplash.com/photo-1749169395459-9eb9835bd718?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwaXp6YSUyMGl0YWxpYW4lMjBmb29kfGVufDF8fHx8MTc2NzE3ODQ2NHww&ixlib=rb-4.1.0&q=80&w=1080"
-                    alt="Italian Pizza">
-            </div>
-            <div class="hero-slide">
-                <img src="https://images.unsplash.com/photo-1657593088889-5105c637f2a8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxyZXN0YXVyYW50JTIwaW50ZXJpb3IlMjBkaW5pbmd8ZW58MXx8fHwxNzY3MTk3NDA5fDA&ixlib=rb-4.1.0&q=80&w=1080"
-                    alt="Restaurant Interior">
-            </div>
+            {% endif %}
         </div>
         <div class="hero-overlay"></div>
 
         <div class="hero-content">
-            <h1 class="hero-title">Where Every Bite<br>Tells a <em>Story</em></h1>
-            <p class="hero-subtitle">Authentic flavors, fresh ingredients, unforgettable moments</p>
+            <h1 class="hero-title">{% if main %}{{ main.translated_h1_text }}{% endif %}</h1>
+            <p class="hero-subtitle">{% if main %}{{ main.translated_h1_sub_text }}{% endif %}</p>
             <div class="hero-actions">
                 <a href="#menu" class="btn-primary">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"></path>
                         <rect x="9" y="3" width="6" height="4" rx="1"></rect>
                     </svg>
-                    View Menu
+                    {% trans "View Menu" %}
                 </a>
-                <a href="tel:+15551234567" class="btn-outline">
+                <a href="{% if main %}{{ main.restoran_reserve_url }}{% else %}#{% endif %}" class="btn-outline">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path
                             d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.11 12 19.79 19.79 0 0 1 1.07 3.4a2 2 0 0 1 1.91-2.18h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z">
                         </path>
                     </svg>
-                    Reserve a Table
+                    {% trans "Reserve a Table" %}
                 </a>
             </div>
         </div>
@@ -126,98 +163,111 @@
         </div>
 
         <div class="hero-controls">
+            {% if main and main.sliders %}
+            {% for slider in main.sliders %}
+            <button class="hero-dot {% if forloop.first %}active{% endif %}" data-i="{{ forloop.counter0 }}"></button>
+            {% endfor %}
+            {% else %}
             <button class="hero-dot active" data-i="0"></button>
-            <button class="hero-dot" data-i="1"></button>
-            <button class="hero-dot" data-i="2"></button>
+            {% endif %}
         </div>
     </section>
 
-    <!-- ── INFO STRIP ─────────────────────────────────────── -->
+    <!-- ── INFO STRIP ─────────────────────────────────────────── -->
     <div class="info-strip">
         <div class="info-strip-inner">
-            <a href="https://maps.google.com" target="_blank" class="info-item">
-                <div class="info-item-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                        <circle cx="12" cy="10" r="3"></circle>
-                    </svg>
-                </div>
-                <div>
-                    <div class="info-item-label">Address</div>
-                    <div class="info-item-value">123 Culinary Street, Food City</div>
-                </div>
+            {% if main and main.infos %}
+            {% for info in main.infos %}
+            {% if info.info_section_url %}
+            <a href="{{ info.info_section_url }}" target="_blank" class="info-item">
+                {% else %}
+                <div class="info-item">
+                    {% endif %}
+                    <div class="info-item-icon">
+                        {% if info.icon == 'location' %}
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                        {% elif info.icon == 'clock' %}
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        {% elif info.icon == 'truck' %}
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <rect x="1" y="3" width="15" height="13"></rect>
+                            <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+                            <circle cx="5.5" cy="18.5" r="2.5"></circle>
+                            <circle cx="18.5" cy="18.5" r="2.5"></circle>
+                        </svg>
+                        {% elif info.icon == 'phone' %}
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path
+                                d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.11 12 19.79 19.79 0 0 1 1.07 3.4a2 2 0 0 1 1.91-2.18h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z">
+                            </path>
+                        </svg>
+                        {% else %}
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="2" y1="12" x2="22" y2="12"></line>
+                            <path
+                                d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z">
+                            </path>
+                        </svg>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <div class="info-item-label">{{ info.translated_name }}</div>
+                        <div class="info-item-value">{{ info.translated_description }}</div>
+                    </div>
+                    {% if info.info_section_url %}
             </a>
-            <div class="info-item">
-                <div class="info-item-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <polyline points="12 6 12 12 16 14"></polyline>
-                    </svg>
-                </div>
-                <div>
-                    <div class="info-item-label">Hours</div>
-                    <div class="info-item-value">Mon–Sun: 10:00 – 22:00</div>
-                </div>
-            </div>
-            <div class="info-item">
-                <div class="info-item-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="1" y="3" width="15" height="13"></rect>
-                        <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
-                        <circle cx="5.5" cy="18.5" r="2.5"></circle>
-                        <circle cx="18.5" cy="18.5" r="2.5"></circle>
-                    </svg>
-                </div>
-                <div>
-                    <div class="info-item-label">Delivery</div>
-                    <div class="info-item-value">30–45 minutes</div>
-                </div>
-            </div>
-            <a href="tel:+15551234567" class="info-item">
-                <div class="info-item-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path
-                            d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.11 12 19.79 19.79 0 0 1 1.07 3.4a2 2 0 0 1 1.91-2.18h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z">
-                        </path>
-                    </svg>
-                </div>
-                <div>
-                    <div class="info-item-label">Reservations</div>
-                    <div class="info-item-value">+1 (555) 123-4567</div>
-                </div>
-            </a>
+            {% else %}
         </div>
+        {% endif %}
+        {% endfor %}
+        {% endif %}
+    </div>
     </div>
 
-    <!-- ── ABOUT ───────────────────────────────────────────── -->
+    <!-- ── ABOUT ───────────────────────────────────────────────── -->
     <section id="about">
         <div class="about-section">
             <div class="about-images">
                 <div class="about-img-main">
-                    <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxyZXN0YXVyYW50JTIwZmluZSUyMGRpbmluZ3xlbnwxfHx8fDE3NjcxOTU3ODB8MA&ixlib=rb-4.1.0&q=80&w=800"
-                        alt="Our restaurant">
+                    {% if main and main.about_us_image_main_src %}
+                    <img src="{{ main.about_us_image_main_src }}" alt="{{ main.restoran_name }}">
+                    {% elif main and main.gallery %}
+                    <img src="{{ main.gallery.0.galery_image_src }}" alt="{{ main.restoran_name }}">
+                    {% endif %}
                 </div>
                 <div class="about-img-accent">
-                    <img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmcmVzaCUyMGluZ3JlZGllbnRzJTIwZm9vZHxlbnwxfHx8fDE3NjcxOTU2OTB8MA&ixlib=rb-4.1.0&q=80&w=600"
-                        alt="Fresh ingredients">
+                    {% if main and main.about_us_image_accent_src %}
+                    <img src="{{ main.about_us_image_accent_src }}" alt="Fresh ingredients">
+                    {% elif main and main.gallery|length > 1 %}
+                    <img src="{{ main.gallery.1.galery_image_src }}" alt="Fresh ingredients">
+                    {% endif %}
                 </div>
             </div>
 
             <div class="about-copy">
-                <div class="about-eyebrow">About Us</div>
-                <h2 class="about-title">Passion on Every<br><em>Plate</em> Since 2018</h2>
-                <p class="about-text">We started Delizioso with a simple belief — that great food should bring people
-                    together. Our chefs source only the freshest local ingredients, crafting each dish with care and a
-                    respect for authentic flavors.</p>
-                <p class="about-text">From our wood-fired pizzas to our signature burgers, every item on our menu is a
-                    labor of love — made to be shared, savored, and remembered.</p>
-                <a href="tel:+15551234567" class="btn-primary" style="display:inline-flex;">
+                <div class="about-eyebrow">{% trans "About Us" %}</div>
+                <h2 class="about-title">{% if main %}{{ main.translated_about_us_title }}{% endif %}</h2>
+                <p class="about-text">{% if main %}{{ main.translated_about_us }}{% endif %}</p>
+                <a href="{% if main %}{{ main.restoran_reserve_url }}{% else %}#{% endif %}" class="btn-primary"
+                    style="display:inline-flex;">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path
                             d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.11 12 19.79 19.79 0 0 1 1.07 3.4a2 2 0 0 1 1.91-2.18h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z">
                         </path>
                     </svg>
-                    Book a Table
+                    {% trans "Reserve a Table" %}
                 </a>
             </div>
         </div>
@@ -225,43 +275,42 @@
 
     <div class="divider"></div>
 
-    <!-- ── MENU ────────────────────────────────────────────── -->
+    <!-- ── MENU ────────────────────────────────────────────────── -->
     <section id="menu" class="menu-section">
         <div class="section-header">
-            <div class="section-eyebrow">Our Menu</div>
+            <div class="section-eyebrow">{% trans "Our Menu" %}</div>
             <h2 class="section-title">Crafted with Love,<br>Served with Pride</h2>
             <p class="section-subtitle">Every dish tells a story of fresh ingredients and authentic recipes</p>
         </div>
 
         <div class="categories-wrap">
             <div class="categories-scroll">
-                <button class="cat-chip active" data-cat="all">All Items</button>
-                <button class="cat-chip" data-cat="burgers">Burgers</button>
-                <button class="cat-chip" data-cat="pizza">Pizza</button>
-                <button class="cat-chip" data-cat="salads">Salads</button>
-                <button class="cat-chip" data-cat="pasta">Pasta</button>
-                <button class="cat-chip" data-cat="wings">Wings & Sides</button>
-                <button class="cat-chip" data-cat="desserts">Desserts</button>
-                <button class="cat-chip" data-cat="drinks">Drinks</button>
+                <button class="cat-chip active" data-cat="all">{% trans "All" %}</button>
+                {% if main %}
+                {% for cat in main.categories %}
+                <button class="cat-chip" data-cat="{{ cat.slug }}">{{ cat.translated_category_name }}</button>
+                {% endfor %}
+                {% endif %}
             </div>
         </div>
 
         <div class="food-grid" id="food-grid"></div>
     </section>
 
-    <!-- ── GALLERY ─────────────────────────────────────────── -->
+    <!-- ── GALLERY ─────────────────────────────────────────────── -->
     <section id="gallery" class="gallery-section">
         <div class="section-header">
-            <div class="section-eyebrow">Gallery</div>
+            <div class="section-eyebrow">{% trans "Our Gallery" %}</div>
             <h2 class="section-title">Moments Worth<br><em
                     style="font-style:italic;color:var(--gold);font-family:'Playfair Display',serif;">Sharing</em></h2>
-            <p class="section-subtitle">Follow us on Instagram @delizioso for daily inspiration</p>
+            <p class="section-subtitle">{% if main %}{{ main.restoran_name }}{% endif %}</p>
         </div>
 
         <div class="gallery-grid">
+            {% if main and main.gallery %}
+            {% for photo in main.gallery %}
             <div class="gallery-item">
-                <img src="https://images.unsplash.com/photo-1565299585323-38d6b0865b47?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxyZXN0YXVyYW50JTIwZm9vZCUyMHBsYXRlfGVufDF8fHx8MTc2NzE5NTY5MHww&ixlib=rb-4.1.0&q=80&w=800"
-                    alt="Gallery 1">
+                <img src="{{ photo.galery_image_src }}" alt="{{ main.restoran_name }} Gallery {{ forloop.counter }}">
                 <div class="gallery-overlay">
                     <div class="gallery-ig">
                         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -273,103 +322,72 @@
                     </div>
                 </div>
             </div>
-            <div class="gallery-item">
-                <img src="https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmb29kJTIwcGhvdG9ncmFwaHl8ZW58MXx8fHwxNzY3MTk1Njg0fDA&ixlib=rb-4.1.0&q=80&w=600"
-                    alt="Gallery 2">
-                <div class="gallery-overlay">
-                    <div class="gallery-ig"><svg width="28" height="28" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="1.5">
-                            <rect x="2" y="2" width="20" height="20" rx="5"></rect>
-                            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                        </svg></div>
-                </div>
-            </div>
-            <div class="gallery-item">
-                <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxncmlsbGVkJTIwZm9vZCUyMGRpc2h8ZW58MXx8fHwxNzY3MTk1Njc4fDA&ixlib=rb-4.1.0&q=80&w=600"
-                    alt="Gallery 3">
-                <div class="gallery-overlay">
-                    <div class="gallery-ig"><svg width="28" height="28" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="1.5">
-                            <rect x="2" y="2" width="20" height="20" rx="5"></rect>
-                            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                        </svg></div>
-                </div>
-            </div>
-            <div class="gallery-item">
-                <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxidXJnZXIlMjBhcnRpc2FufGVufDF8fHx8MTc2NzE5NTY4MXww&ixlib=rb-4.1.0&q=80&w=600"
-                    alt="Gallery 4">
-                <div class="gallery-overlay">
-                    <div class="gallery-ig"><svg width="28" height="28" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="1.5">
-                            <rect x="2" y="2" width="20" height="20" rx="5"></rect>
-                            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                        </svg></div>
-                </div>
-            </div>
-            <div class="gallery-item">
-                <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxyZXN0YXVyYW50JTIwYW1iaWFuY2V8ZW58MXx8fHwxNzY3MTk1Njg3fDA&ixlib=rb-4.1.0&q=80&w=600"
-                    alt="Gallery 5">
-                <div class="gallery-overlay">
-                    <div class="gallery-ig"><svg width="28" height="28" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="1.5">
-                            <rect x="2" y="2" width="20" height="20" rx="5"></rect>
-                            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                        </svg></div>
-                </div>
-            </div>
+            {% endfor %}
+            {% endif %}
         </div>
     </section>
 
-    <!-- ── FOOTER ─────────────────────────────────────────── -->
+    <!-- ── FOOTER ─────────────────────────────────────────────── -->
     <footer id="contact" class="footer">
         <div class="footer-inner">
             <div>
-                <div class="footer-brand-name">Delizioso</div>
-                <p class="footer-tagline">Where passion meets the plate. Authentic flavors, crafted with love since
-                    2018.</p>
+                <div class="footer-brand-name">{% if main %}{{ main.restoran_name }}{% endif %}</div>
+                <p class="footer-tagline">{% if main %}{{ main.footer_text }}{% endif %}</p>
                 <div class="footer-socials">
-                    <a href="https://instagram.com" target="_blank" class="footer-social" aria-label="Instagram">
+                    {% if main %}
+                    {% for social in main.socials %}
+                    <a href="{{ social.social_media_url }}" target="_blank" class="footer-social"
+                        aria-label="{{ social.social_media_name }}">
+                        {% with name=social.social_media_name|lower %}
+                        {% if name == 'instagram' %}
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2">
                             <rect x="2" y="2" width="20" height="20" rx="5"></rect>
                             <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
                             <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
                         </svg>
-                    </a>
-                    <a href="https://tiktok.com" target="_blank" class="footer-social" aria-label="TikTok">
+                        {% elif name == 'tiktok' %}
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                             <path
                                 d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
                         </svg>
-                    </a>
-                    <a href="https://facebook.com" target="_blank" class="footer-social" aria-label="Facebook">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
-                        </svg>
-                    </a>
-                    <a href="https://wa.me/15551234567" target="_blank" class="footer-social" aria-label="WhatsApp">
+                        {% elif name == 'whatsapp' %}
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2">
                             <path
                                 d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z">
                             </path>
                         </svg>
+                        {% elif name == 'facebook' %}
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
+                        </svg>
+                        {% else %}
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="2" y1="12" x2="22" y2="12"></line>
+                            <path
+                                d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z">
+                            </path>
+                        </svg>
+                        {% endif %}
+                        {% endwith %}
                     </a>
+                    {% endfor %}
+                    {% endif %}
                 </div>
             </div>
 
             <div>
                 <div class="footer-col-title">Quick Links</div>
                 <ul class="footer-links">
-                    <li><a href="#about">About Us</a></li>
-                    <li><a href="#menu">Menu</a></li>
-                    <li><a href="#gallery">Gallery</a></li>
-                    <li><a href="tel:+15551234567">Reserve a Table</a></li>
+                    <li><a href="#about">{% trans "About Us" %}</a></li>
+                    <li><a href="#menu">{% trans "Menu" %}</a></li>
+                    <li><a href="#gallery">{% trans "Gallery" %}</a></li>
+                    <li><a href="{% if main %}{{ main.restoran_reserve_url }}{% else %}#{% endif %}">{% trans "Reserve a
+                            Table" %}</a></li>
                 </ul>
             </div>
 
@@ -380,7 +398,7 @@
                         <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
                         <circle cx="12" cy="10" r="3"></circle>
                     </svg>
-                    <span>123 Culinary Street,<br>Food City, FC 10001</span>
+                    <span>{% if main %}{{ main.footer_adress }}{% endif %}</span>
                 </div>
                 <div class="footer-contact-item">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -388,25 +406,26 @@
                             d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.11 12 19.79 19.79 0 0 1 1.07 3.4a2 2 0 0 1 1.91-2.18h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z">
                         </path>
                     </svg>
-                    <span>+1 (555) 123-4567</span>
+                    <span>{% if main %}{{ main.footer_phone }}{% endif %}</span>
                 </div>
                 <div class="footer-contact-item">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="10"></circle>
                         <polyline points="12 6 12 12 16 14"></polyline>
                     </svg>
-                    <span>Mon–Sun<br>10:00 – 22:00</span>
+                    <span>{% if main %}{{ main.footer_open_time }}{% endif %}</span>
                 </div>
             </div>
         </div>
 
         <div class="footer-bottom">
-            <span class="footer-copy">© 2025 Delizioso. All rights reserved.</span>
+            <span class="footer-copy">© 2025 {% if main %}{{ main.restoran_name }}{% endif %}. All rights
+                reserved.</span>
             <span class="footer-made">Made with ♥ for food lovers</span>
         </div>
     </footer>
 
-    <!-- ── MOBILE CTA ─────────────────────────────────────── -->
+    <!-- ── MOBILE CTA ─────────────────────────────────────────── -->
     <div class="mobile-cta">
         <a href="#menu" class="mobile-cta-btn mobile-cta-menu">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -415,7 +434,7 @@
             </svg>
             Menu
         </a>
-        <a href="tel:+15551234567" class="mobile-cta-btn mobile-cta-call">
+        <a href="tel:{% if main %}{{ main.footer_phone }}{% endif %}" class="mobile-cta-btn mobile-cta-call">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path
                     d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.11 12 19.79 19.79 0 0 1 1.07 3.4a2 2 0 0 1 1.91-2.18h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z">
@@ -425,7 +444,7 @@
         </a>
     </div>
 
-    <!-- ── MODAL ──────────────────────────────────────────── -->
+    <!-- ── MODAL ──────────────────────────────────────────────── -->
     <div class="modal-backdrop" id="modal" role="dialog" aria-modal="true">
         <div class="modal-box">
             <div class="modal-img-wrap">
@@ -447,7 +466,7 @@
                     <p class="modal-text" id="m-desc"></p>
                 </div>
                 <div>
-                    <div class="modal-section-title">Ingredients</div>
+                    <div class="modal-section-title">{% trans "Ingredients:" %}</div>
                     <ul class="modal-ingredients" id="m-ingredients"></ul>
                 </div>
                 <div class="modal-allergens-box" id="m-allergens">
@@ -457,7 +476,7 @@
                         <line x1="12" y1="17" x2="12.01" y2="17"></line>
                     </svg>
                     <div>
-                        <div class="modal-allergens-title">Allergen Information</div>
+                        <div class="modal-allergens-title">{% trans "Allergens:" %}</div>
                         <div class="modal-allergens-text" id="m-allergens-text"></div>
                     </div>
                 </div>
@@ -465,6 +484,8 @@
         </div>
     </div>
 
+    <!-- Menu data passed from Django -->
+    <script>window.MENU_DATA = {{ foods_json | safe }};</script>
     <script type="module" src="{% static 'js/menu/main.js' %}"></script>
 
 </body>

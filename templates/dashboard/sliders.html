@@ -1,0 +1,86 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+
+{% block content %}
+
+<div class="db-page-header">
+  <div>
+    <h2 class="db-page-header__title">Hero Sliders</h2>
+    <p class="db-page-header__sub">Manage hero slider images (max 3). Upload a file or paste an image URL.</p>
+  </div>
+</div>
+
+<form method="post" enctype="multipart/form-data" novalidate>
+  {% csrf_token %}
+  {{ formset.management_form }}
+
+  {% if formset.non_form_errors %}
+    <div class="db-non-field-errors">{% for e in formset.non_form_errors %}{{ e }}{% endfor %}</div>
+  {% endif %}
+
+  <div class="db-formset">
+    {% for form in formset %}
+      {% if form.instance.pk %}
+        <div class="db-formset-item {% if form.DELETE.value %}db-formset-item--deleted{% endif %}">
+          <div class="db-formset-item__header">
+            <span class="db-formset-item__num">Slide {{ forloop.counter }}</span>
+            <label class="db-delete-row">{{ form.DELETE }}<span>Delete</span></label>
+          </div>
+          <div class="db-formset-item__body">
+            {{ form.id }}
+            <div class="db-field db-field--full">
+              <label class="db-label">Slide Image</label>
+              {% if form.instance.slide_image_src %}
+                <div class="db-img-preview db-img-preview--wide">
+                  <img src="{{ form.instance.slide_image_src }}" alt="Slide {{ forloop.counter }}" />
+                  <span class="db-img-preview__label">Current</span>
+                </div>
+              {% endif %}
+              <div class="db-img-or-url">
+                <div class="db-img-or-url__side">
+                  <span class="db-img-or-url__sublabel">Upload file</span>
+                  {{ form.slide_image }}
+                  {% if form.slide_image.errors %}<ul class="db-field-errors">{% for e in form.slide_image.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+                <div class="db-img-or-url__divider">or</div>
+                <div class="db-img-or-url__side">
+                  <span class="db-img-or-url__sublabel">Paste image URL</span>
+                  {{ form.slide_image_url }}
+                  {% if form.slide_image_url.errors %}<ul class="db-field-errors">{% for e in form.slide_image_url.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% else %}
+        {% if formset.total_form_count <= formset.max_num %}
+          <div class="db-formset-add">
+            <p class="db-formset-add__title">Add New Slide</p>
+            {{ form.id }}
+            <div class="db-field db-field--full">
+              <label class="db-label">Slide Image</label>
+              <div class="db-img-or-url">
+                <div class="db-img-or-url__side">
+                  <span class="db-img-or-url__sublabel">Upload file</span>
+                  {{ form.slide_image }}
+                </div>
+                <div class="db-img-or-url__divider">or</div>
+                <div class="db-img-or-url__side">
+                  <span class="db-img-or-url__sublabel">Paste image URL</span>
+                  {{ form.slide_image_url }}
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  <div class="db-form-actions">
+    <button type="submit" class="db-btn db-btn--primary">Save Sliders</button>
+    <a href="{% url 'dashboard:home' %}" class="db-btn db-btn--ghost">Back</a>
+  </div>
+</form>
+
+{% endblock %}

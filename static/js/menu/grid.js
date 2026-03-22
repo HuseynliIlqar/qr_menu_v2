@@ -73,7 +73,7 @@ export function initCategoryFilter(allFoods) {
             activeCat = btn.dataset.cat;
             const filtered = activeCat === 'all'
                 ? allFoods
-                : allFoods.filter(f => f.cat === activeCat);
+                : allFoods.filter(f => Array.isArray(f.cats) ? f.cats.includes(activeCat) : f.cat === activeCat);
 
             renderGrid(filtered);
         });

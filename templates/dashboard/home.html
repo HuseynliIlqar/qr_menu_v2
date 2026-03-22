@@ -1,0 +1,148 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+
+{% block content %}
+
+<div class="db-page-header">
+  <div>
+    <h2 class="db-page-header__title">Welcome back{% if request.user.first_name %}, {{ request.user.first_name }}{% endif %} 👋</h2>
+    <p class="db-page-header__sub">Here's an overview of your restaurant content.</p>
+  </div>
+</div>
+
+{% if not main %}
+  <div class="db-card">
+    <div class="db-card__body">
+      <div class="db-empty">
+        <div class="db-empty__icon">⚠️</div>
+        <p class="db-empty__title">No restaurant data found</p>
+        <p class="db-empty__sub">Start by creating your restaurant info to populate this dashboard.</p>
+        <a href="{% url 'dashboard:restaurant' %}" class="db-btn db-btn--primary">Create Restaurant Info</a>
+      </div>
+    </div>
+  </div>
+{% else %}
+
+<!-- Overview Stats Grid -->
+<div class="db-overview-grid">
+
+  <!-- Restaurant Info -->
+  <div class="db-stat-card">
+    <div class="db-stat-card__icon">🍽️</div>
+    <div>
+      <div class="db-stat-card__label">Restaurant Info</div>
+      <div class="db-stat-card__value">1</div>
+    </div>
+    <a href="{% url 'dashboard:restaurant' %}" class="db-stat-card__link">Edit info →</a>
+  </div>
+
+  <!-- Hero Slider -->
+  <div class="db-stat-card">
+    <div class="db-stat-card__icon">🖼️</div>
+    <div>
+      <div class="db-stat-card__label">Hero Sliders</div>
+      <div class="db-stat-card__value">{{ slider_count }}</div>
+    </div>
+    <a href="{% url 'dashboard:sliders' %}" class="db-stat-card__link">Manage sliders →</a>
+  </div>
+
+  <!-- Social Media -->
+  <div class="db-stat-card">
+    <div class="db-stat-card__icon">🔗</div>
+    <div>
+      <div class="db-stat-card__label">Social Media</div>
+      <div class="db-stat-card__value">{{ social_count }}</div>
+    </div>
+    <a href="{% url 'dashboard:social' %}" class="db-stat-card__link">Edit links →</a>
+  </div>
+
+  <!-- Info Strip -->
+  <div class="db-stat-card">
+    <div class="db-stat-card__icon">ℹ️</div>
+    <div>
+      <div class="db-stat-card__label">Info Strip</div>
+      <div class="db-stat-card__value">{{ info_count }}</div>
+    </div>
+    <a href="{% url 'dashboard:info' %}" class="db-stat-card__link">Edit info strip →</a>
+  </div>
+
+  <!-- About Images -->
+  <div class="db-stat-card">
+    <div class="db-stat-card__icon">📸</div>
+    <div>
+      <div class="db-stat-card__label">About Images</div>
+      <div class="db-stat-card__value">
+        {% if main.about_us_image_main and main.about_us_image_accent %}2
+        {% elif main.about_us_image_main or main.about_us_image_accent %}1
+        {% else %}0{% endif %}
+      </div>
+    </div>
+    <a href="{% url 'dashboard:restaurant' %}" class="db-stat-card__link">Edit about →</a>
+  </div>
+
+  <!-- Gallery -->
+  <div class="db-stat-card">
+    <div class="db-stat-card__icon">📷</div>
+    <div>
+      <div class="db-stat-card__label">Gallery Photos</div>
+      <div class="db-stat-card__value">{{ gallery_count }}</div>
+    </div>
+    <a href="{% url 'dashboard:gallery' %}" class="db-stat-card__link">Manage gallery →</a>
+  </div>
+
+  <!-- Categories -->
+  <div class="db-stat-card">
+    <div class="db-stat-card__icon">🗂️</div>
+    <div>
+      <div class="db-stat-card__label">Menu Categories</div>
+      <div class="db-stat-card__value">{{ category_count }}</div>
+    </div>
+    <a href="{% url 'dashboard:categories' %}" class="db-stat-card__link">Edit categories →</a>
+  </div>
+
+  <!-- Menu Items -->
+  <div class="db-stat-card">
+    <div class="db-stat-card__icon">📋</div>
+    <div>
+      <div class="db-stat-card__label">Menu Items</div>
+      <div class="db-stat-card__value">{{ menu_count }}</div>
+    </div>
+    <a href="{% url 'dashboard:menu_list' %}" class="db-stat-card__link">View menu →</a>
+  </div>
+
+</div><!-- /db-overview-grid -->
+
+<!-- Quick Info -->
+<div class="db-card">
+  <div class="db-card__header">
+    <div>
+      <p class="db-card__title">{{ main.restoran_name }}</p>
+      <p class="db-card__subtitle">{{ main.footer_adress }}</p>
+    </div>
+    <a href="{% url 'dashboard:restaurant' %}" class="db-btn db-btn--ghost db-btn--sm">Edit</a>
+  </div>
+  <div class="db-card__body">
+    <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px;">
+      <div>
+        <p class="db-text-muted db-text-sm" style="font-weight:600; text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px;">Phone</p>
+        <p>{{ main.footer_phone|default:"—" }}</p>
+      </div>
+      <div>
+        <p class="db-text-muted db-text-sm" style="font-weight:600; text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px;">Hours</p>
+        <p>{{ main.footer_open_time|default:"—" }}</p>
+      </div>
+      <div>
+        <p class="db-text-muted db-text-sm" style="font-weight:600; text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px;">Hero Text</p>
+        <p>{{ main.h1_text|default:"—" }}</p>
+      </div>
+      <div>
+        <p class="db-text-muted db-text-sm" style="font-weight:600; text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px;">Reserve URL</p>
+        <p style="word-break:break-all; font-size:12px; color:#71717a;">{{ main.restoran_reserve_url|default:"—" }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endif %}
+
+{% endblock %}

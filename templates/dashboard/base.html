@@ -1,0 +1,163 @@
+{% load static i18n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}{{ page_title|default:"Dashboard" }}{% endblock %} — Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{% static 'style/dashboard.css' %}" />
+  <style>
+    /* Lang switcher — topbar */
+    .lang-form { margin: 0; }
+    .lang-sw { display: flex; gap: 2px; background: #ffffff; border-radius: 6px; padding: 2px; border: 1px solid #e4e4e7; }
+    .lang-sw button { padding: 4px 9px; font-size: 10.5px; font-weight: 700; border: none; border-radius: 4px; background: transparent; color: #52525b; cursor: pointer; font-family: inherit; letter-spacing: .04em; transition: all .15s; }
+    .lang-sw button.on { background: #f59e0b; color: #fff; }
+    .lang-sw button:hover:not(.on) { background: #e4e4e7; color: #18181b; }
+    /* Translation field tabs */
+    .trans-tabs { margin-bottom: 0; }
+    .trans-tabs__nav { display: flex; gap: 3px; margin-bottom: 8px; }
+    .trans-tab-btn { padding: 4px 12px; font-size: 11.5px; font-weight: 700; border: 1px solid #e4e4e7; border-radius: 5px; background: #f4f4f5; color: #71717a; cursor: pointer; font-family: inherit; letter-spacing: .04em; transition: all .15s; }
+    .trans-tab-btn.active { background: #f59e0b; color: #fff; border-color: #f59e0b; }
+    .trans-tab-btn:hover:not(.active) { background: #e4e4e7; color: #18181b; }
+    .trans-tab-pane { display: none; }
+    .trans-tab-pane.active { display: block; }
+  </style>
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+{% if request.user.is_authenticated %}
+{% get_current_language as cur_lang %}
+<div class="db-layout">
+
+  <!-- ═══════════════ SIDEBAR ═══════════════ -->
+  <aside class="db-sidebar" id="dbSidebar">
+
+    <!-- Brand -->
+    <div class="db-sidebar__brand">
+      {% if main and main.restoran_icon %}
+        <img src="{{ main.restoran_icon.url }}" alt="Logo" class="db-sidebar__logo" />
+      {% else %}
+        <div class="db-sidebar__logo-placeholder">
+          {% if main %}{{ main.restoran_name|slice:":1"|upper }}{% else %}R{% endif %}
+        </div>
+      {% endif %}
+      <span class="db-sidebar__name">
+        {% if main %}{{ main.restoran_name }}{% else %}Restaurant{% endif %}
+      </span>
+    </div>
+
+    <!-- Nav -->
+    <nav class="db-sidebar__nav">
+
+      <span class="db-sidebar__section-label">{% trans "Overview" %}</span>
+      <a href="{% url 'dashboard:home' %}"
+         class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+        <span class="nav-icon">🏠</span> {% trans "Dashboard" %}
+      </a>
+
+      <span class="db-sidebar__section-label">{% trans "Content" %}</span>
+      <a href="{% url 'dashboard:restaurant' %}"
+         class="{% if request.resolver_match.url_name == 'restaurant' %}active{% endif %}">
+        <span class="nav-icon">🍽️</span> {% trans "Restaurant Info" %}
+      </a>
+      <a href="{% url 'dashboard:sliders' %}"
+         class="{% if request.resolver_match.url_name == 'sliders' %}active{% endif %}">
+        <span class="nav-icon">🖼️</span> {% trans "Hero Sliders" %}
+      </a>
+      <a href="{% url 'dashboard:social' %}"
+         class="{% if request.resolver_match.url_name == 'social' %}active{% endif %}">
+        <span class="nav-icon">🔗</span> {% trans "Social Media" %}
+      </a>
+      <a href="{% url 'dashboard:info' %}"
+         class="{% if request.resolver_match.url_name == 'info' %}active{% endif %}">
+        <span class="nav-icon">ℹ️</span> {% trans "Info Strip" %}
+      </a>
+      <a href="{% url 'dashboard:gallery' %}"
+         class="{% if request.resolver_match.url_name == 'gallery' %}active{% endif %}">
+        <span class="nav-icon">📷</span> {% trans "Gallery" %}
+      </a>
+
+      <span class="db-sidebar__section-label">{% trans "Menu" %}</span>
+      <a href="{% url 'dashboard:categories' %}"
+         class="{% if request.resolver_match.url_name == 'categories' %}active{% endif %}">
+        <span class="nav-icon">🗂️</span> {% trans "Categories" %}
+      </a>
+      <a href="{% url 'dashboard:menu_list' %}"
+         class="{% if request.resolver_match.url_name == 'menu_list' or request.resolver_match.url_name == 'menu_add' or request.resolver_match.url_name == 'menu_edit' %}active{% endif %}">
+        <span class="nav-icon">📋</span> {% trans "Menu Items" %}
+      </a>
+
+    </nav>
+
+    <!-- Footer -->
+    <div class="db-sidebar__footer">
+      <a href="{% url 'dashboard:logout' %}">
+        <span class="nav-icon">🚪</span> {% trans "Logout" %}
+      </a>
+    </div>
+
+  </aside>
+
+  <!-- ═══════════════ MAIN ═══════════════ -->
+  <div class="db-main">
+
+    <!-- Top Bar -->
+    <header class="db-topbar">
+      <h1 class="db-topbar__title">{{ page_title|default:"Dashboard" }}</h1>
+      <div class="db-topbar__right">
+        <form action="{% url 'set_language' %}" method="post" class="lang-form">
+          {% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
+          <div class="lang-sw">
+            <button type="submit" name="language" value="az" class="{% if cur_lang == 'az' %}on{% endif %}">AZ</button>
+            <button type="submit" name="language" value="en" class="{% if cur_lang == 'en' %}on{% endif %}">EN</button>
+            <button type="submit" name="language" value="ru" class="{% if cur_lang == 'ru' %}on{% endif %}">RU</button>
+          </div>
+        </form>
+        <span class="db-topbar__user">{{ request.user.username }}</span>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main class="db-content">
+
+      {% if messages %}
+      <div class="db-messages">
+        {% for message in messages %}
+          <div class="db-message db-message--{% if message.tags == 'error' %}error{% elif message.tags == 'success' %}success{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {% block content %}{% endblock %}
+
+    </main>
+  </div><!-- /db-main -->
+
+</div><!-- /db-layout -->
+{% else %}
+  <meta http-equiv="refresh" content="0;url={% url 'dashboard:login' %}" />
+  <p>Redirecting to <a href="{% url 'dashboard:login' %}">login</a>…</p>
+{% endif %}
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.trans-tabs__nav').forEach(function (nav) {
+      nav.querySelectorAll('.trans-tab-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var tabs = btn.closest('.trans-tabs');
+          var lang = btn.dataset.lang;
+          tabs.querySelectorAll('.trans-tab-btn').forEach(function (b) { b.classList.toggle('active', b === btn); });
+          tabs.querySelectorAll('.trans-tab-pane').forEach(function (p) { p.classList.toggle('active', p.dataset.pane === lang); });
+        });
+      });
+    });
+  });
+</script>
+</body>
+</html>

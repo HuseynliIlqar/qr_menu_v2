@@ -1,0 +1,99 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QRMenu — {% trans "Sign In" %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #18181b; min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px 16px;
+    }
+    .top-bar { width: 100%; max-width: 420px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .logo { display: flex; align-items: center; gap: 8px; color: #fff; font-size: 20px; font-weight: 800; text-decoration: none; }
+    .logo span { color: #f59e0b; }
+    /* Lang switcher */
+    .lang-form { margin: 0; }
+    .lang-sw { display: flex; gap: 2px; background: rgba(95, 94, 94, 0.08); border-radius: 5px; padding: 2px; }
+    .lang-sw button { padding: 3px 7px; font-size: 10.5px; font-weight: 700; border: none; border-radius: 3px; background: transparent; color: rgba(255,255,255,.6); cursor: pointer; font-family: inherit; letter-spacing: .04em; transition: all .15s; }
+    .lang-sw button.on { background: #f59e0b; color: #fff; }
+    .lang-sw button:hover:not(.on) { background: rgba(255,255,255,.15); color: #fff; }
+    /* Card */
+    .card { background: #fff; border-radius: 14px; padding: 44px 40px; width: 100%; max-width: 420px; box-shadow: 0 24px 64px rgba(0,0,0,.45); }
+    .logo-icon { width: 64px; height: 64px; border-radius: 50%; background: #f59e0b; display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 16px; }
+    .card-title { font-size: 22px; font-weight: 800; color: #18181b; text-align: center; margin-bottom: 4px; }
+    .card-sub { font-size: 13px; color: #a1a1aa; text-align: center; margin-bottom: 28px; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 16px; }
+    label { font-size: 12.5px; font-weight: 600; color: #52525b; }
+    input[type="text"], input[type="password"] { width: 100%; padding: 10px 14px; font-family: inherit; font-size: 14px; color: #18181b; background: #fff; border: 1px solid #e4e4e7; border-radius: 7px; outline: none; transition: border-color .15s, box-shadow .15s; }
+    input:focus { border-color: #f59e0b; box-shadow: 0 0 0 3px rgba(245,158,11,.14); }
+    .error-list { background: #fef2f2; border: 1px solid #fca5a5; border-radius: 6px; padding: 8px 12px; color: #991b1b; font-size: 12.5px; list-style: none; margin-top: 4px; }
+    .error-list li { margin-bottom: 2px; }
+    .btn-submit { display: block; width: 100%; padding: 12px; margin-top: 8px; background: #f59e0b; color: #fff; font-family: inherit; font-size: 15px; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; letter-spacing: .01em; transition: background .15s, box-shadow .15s; }
+    .btn-submit:hover { background: #d97706; box-shadow: 0 4px 14px rgba(245,158,11,.35); }
+    .register-link { text-align: center; margin-top: 20px; font-size: 13px; color: #71717a; }
+    .register-link a { color: #f59e0b; font-weight: 600; text-decoration: none; }
+    .register-link a:hover { text-decoration: underline; }
+    @media (max-width: 480px) { .card { padding: 28px 20px; } }
+  </style>
+</head>
+<body>
+
+{% get_current_language as cur_lang %}
+
+<div class="top-bar">
+  <a href="/" class="logo">🍽️ <span>QR</span>Menu</a>
+  <form action="{% url 'set_language' %}" method="post" class="lang-form">
+    {% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
+    <div class="lang-sw">
+      <button type="submit" name="language" value="az" class="{% if cur_lang == 'az' %}on{% endif %}">AZ</button>
+      <button type="submit" name="language" value="en" class="{% if cur_lang == 'en' %}on{% endif %}">EN</button>
+      <button type="submit" name="language" value="ru" class="{% if cur_lang == 'ru' %}on{% endif %}">RU</button>
+    </div>
+  </form>
+</div>
+
+<div class="card">
+  <div class="logo-icon">🍽️</div>
+  <p class="card-title">{% trans "Welcome back" %}</p>
+  <p class="card-sub">{% trans "Sign in to manage your restaurant" %}</p>
+
+  {% if form.non_field_errors %}
+    <ul class="error-list" style="margin-bottom:16px">
+      {% for e in form.non_field_errors %}<li>{{ e }}</li>{% endfor %}
+    </ul>
+  {% endif %}
+
+  <form method="post" novalidate>
+    {% csrf_token %}
+
+    <div class="form-group">
+      <label for="{{ form.username.id_for_label }}">{% trans "Username" %}</label>
+      {{ form.username }}
+      {% if form.username.errors %}
+        <ul class="error-list">{% for e in form.username.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+      {% endif %}
+    </div>
+
+    <div class="form-group">
+      <label for="{{ form.password.id_for_label }}">{% trans "Password" %}</label>
+      {{ form.password }}
+      {% if form.password.errors %}
+        <ul class="error-list">{% for e in form.password.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+      {% endif %}
+    </div>
+
+    <button type="submit" class="btn-submit">{% trans "Sign In →" %}</button>
+  </form>
+
+  <p class="register-link">{% trans "New here?" %} <a href="/register/">{% trans "Create your restaurant" %}</a></p>
+</div>
+
+</body>
+</html>
