@@ -48,6 +48,7 @@ SHARED_APPS = [
 
 TENANT_APPS = [
     'qr_menu_app',
+    'calls',
 ]
 
 INSTALLED_APPS = list(SHARED_APPS) + [
@@ -110,3 +111,15 @@ AUTH_PASSWORD_VALIDATORS = [
 LOGIN_URL = '/dashboard/login/'
 LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/dashboard/login/'
+
+# ── WebPush / VAPID ───────────────────────────────────────────────────────────
+# Generate keys once with: python -m py_vapid --gen --applicationServerKey
+# Then copy the values into your .env file.
+VAPID_PUBLIC_KEY = config('VAPID_PUBLIC_KEY', default='')
+VAPID_PRIVATE_KEY = config('VAPID_PRIVATE_KEY', default='')
+VAPID_ADMIN_EMAIL = config('VAPID_ADMIN_EMAIL', default='admin@example.com')
+
+# ── WhatsApp Selenium bot ─────────────────────────────────────────────────────
+# Set WHATSAPP_BOT_ENABLED=True once ChromeDriver is installed and configured.
+WHATSAPP_BOT_ENABLED = config('WHATSAPP_BOT_ENABLED', default=False, cast=bool)
+WHATSAPP_BOT_NUMBER = config('WHATSAPP_BOT_NUMBER', default='994XXXXXXXXX')

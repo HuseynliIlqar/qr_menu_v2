@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gözləyirsiniz…</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body { background: #f8faff; }
+    .spinner-ring {
+      width: 64px; height: 64px;
+      border: 6px solid #dee2e6;
+      border-top-color: #0d6efd;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1.5rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+<div class="container d-flex flex-column align-items-center justify-content-center"
+     style="min-height:100vh; max-width:480px">
+
+  <div id="state-loading" class="text-center">
+    <div class="spinner-ring"></div>
+    <h4 class="fw-semibold" id="status-text">Bildiriş icazəsi alınır…</h4>
+    <p class="text-muted mt-2">Zəhmət olmasa gözləyin</p>
+  </div>
+
+  <div id="state-waiting" class="text-center d-none">
+    <div class="spinner-ring"></div>
+    <h4 class="fw-semibold text-success">Sifarişiniz hazırlanır</h4>
+    <p class="text-muted mt-2">
+      Sifarişiniz hazır olanda bildiriş alacaqsınız.<br />
+      Bu səhifəni açıq saxlayın.
+    </p>
+    <span class="badge bg-secondary mt-2">Kod: {{ call.token }}</span>
+  </div>
+
+  <div id="state-called" class="text-center d-none">
+    <div style="font-size:3rem">🔔</div>
+    <h3 class="fw-bold text-primary mt-3">Sifarişiniz hazırdır!</h3>
+    <p class="text-muted">Zəhmət olmasa kassaya yaxınlaşın.</p>
+  </div>
+
+</div>
+
+<script>
+  const TOKEN        = "{{ call.token }}";
+  const WA_URL       = "{{ wa_url }}";
+  const SUBSCRIBE_URL = "{{ subscribe_url }}";
+  const VAPID_KEY    = "{{ vapid_public_key }}";
+
+  /* ── Helpers ────────────────────────────────────────────── */
+  function show(id) {
+    ['state-loading','state-waiting','state-called'].forEach(s => {
+      document.getElementById(s).classList.toggle('d-none', s !== id);
+    });
+  }
+
+  function urlBase64ToUint8Array(base64) {
+    const pad = '='.repeat((4 - base64.length % 4) % 4);
+    const b64 = (base64 + pad).replace(/-/g, '+').replace(/_/g, '/');
+    const raw = atob(b64);
+    return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
+  }
+
+  /* ── WhatsApp fallback ──────────────────────────────────── */
+  function goWhatsApp() {
+    window.location.href = WA_URL;
+  }
+
+  /* ── Push subscription ──────────────────────────────────── */
+  async function setupPush() {
+    if (!VAPID_KEY) { goWhatsApp(); return; }
+
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+      goWhatsApp();
+      return;
+    }
+
+    let permission;
+    try {
+      permission = await Notification.requestPermission();
+    } catch (_) {
+      goWhatsApp();
+      return;
+    }
+
+    if (permission !== 'granted') {
+      goWhatsApp();
+      return;
+    }
+
+    try {
+      const reg = await navigator.serviceWorker.register('/sw.js');
+      await navigator.serviceWorker.ready;
+
+      const sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_KEY),
+      });
+
+      const res = await fetch(SUBSCRIBE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(sub.toJSON()),
+      });
+
+      if (!res.ok) throw new Error('Server rejected subscription');
+
+      show('state-waiting');
+    } catch (err) {
+      console.warn('Push setup failed:', err);
+      goWhatsApp();
+    }
+  }
+
+  /* ── Status poll (every 5 s) ────────────────────────────── */
+  async function pollStatus() {
+    try {
+      const res = await fetch(`/bar/dashboard/data/`);
+      if (!res.ok) return;
+      const { calls } = await res.json();
+      const me = calls.find(c => c.token === TOKEN);
+      if (me && me.status === 'called') {
+        show('state-called');
+      }
+    } catch (_) { /* ignore network blips */ }
+  }
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    await setupPush();
+    setInterval(pollStatus, 5000);
+  });
+</script>
+</body>
+</html>

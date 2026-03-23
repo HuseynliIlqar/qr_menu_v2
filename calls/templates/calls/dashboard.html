@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Barman Paneli</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body { background: #f0f4f8; }
+    .table th { white-space: nowrap; }
+    .badge-webpush  { background: #6610f2; }
+    .badge-whatsapp { background: #25d366; }
+    .badge-unknown  { background: #6c757d; }
+    .badge-waiting  { background: #ffc107; color:#000; }
+    .badge-called   { background: #0d6efd; }
+    .badge-done     { background: #198754; }
+    .pulse {
+      animation: pulse 1.4s infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity:1; }
+      50%      { opacity:.4; }
+    }
+  </style>
+</head>
+<body>
+<nav class="navbar navbar-dark bg-dark mb-4 px-3">
+  <span class="navbar-brand fw-bold">🍺 Barman Paneli</span>
+  <span class="text-secondary small" id="last-refresh"></span>
+</nav>
+
+<div class="container-fluid px-4">
+  <div id="no-calls" class="text-center text-muted py-5 d-none">
+    <p class="fs-5">Aktiv çağırış yoxdur</p>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-hover bg-white rounded shadow-sm align-middle" id="calls-table">
+      <thead class="table-dark">
+        <tr>
+          <th>#</th>
+          <th>Kod</th>
+          <th>Ad</th>
+          <th>Bildiriş</th>
+          <th>Vəziyyət</th>
+          <th>Vaxt</th>
+          <th>Əməliyyat</th>
+        </tr>
+      </thead>
+      <tbody id="calls-body">
+        {% for c in calls %}
+        <tr data-token="{{ c.token }}" data-notif="{{ c.notification_type }}" data-status="{{ c.status }}">
+          <td class="text-muted small">{{ forloop.counter }}</td>
+          <td><code class="fw-bold">{{ c.token }}</code></td>
+          <td>
+            <div class="input-group input-group-sm" style="min-width:140px">
+              <input type="text" class="form-control name-input"
+                     value="{{ c.name }}"
+                     placeholder="Ad daxil et" />
+              <button class="btn btn-outline-secondary btn-save-name" type="button">✔</button>
+            </div>
+          </td>
+          <td>
+            <span class="badge badge-{{ c.notification_type }}">
+              {{ c.notification_type }}
+            </span>
+          </td>
+          <td>
+            <span class="badge badge-{{ c.status }}">{{ c.status }}</span>
+          </td>
+          <td class="text-muted small">{{ c.created_at|date:"H:i:s" }}</td>
+          <td>
+            {% if c.status != 'done' %}
+            <button class="btn btn-primary btn-sm btn-call me-1"
+                    {% if c.notification_type == 'unknown' %}disabled title="Bildiriş metodu seçilməyib"{% endif %}>
+              Çağır
+            </button>
+            <button class="btn btn-success btn-sm btn-done">Hazır ✓</button>
+            {% else %}
+            <span class="text-success small">Tamamlandı</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <!-- populated by JS poll -->
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+const CSRF = "{{ csrf_token }}";
+
+/* ── Row builder ───────────────────────────────────────── */
+function buildRow(c, idx) {
+  const notifClass = `badge-${c.notification_type}`;
+  const statusClass = `badge-${c.status}`;
+  const disabledAttr = c.notification_type === 'unknown' ? 'disabled title="Bildiriş metodu seçilməyib"' : '';
+  const actionCell = c.status !== 'done'
+    ? `<button class="btn btn-primary btn-sm btn-call me-1" ${disabledAttr}>Çağır</button>
+       <button class="btn btn-success btn-sm btn-done">Hazır ✓</button>`
+    : `<span class="text-success small">Tamamlandı</span>`;
+
+  return `
+    <tr data-token="${c.token}" data-notif="${c.notification_type}" data-status="${c.status}">
+      <td class="text-muted small">${idx}</td>
+      <td><code class="fw-bold">${c.token}</code></td>
+      <td>
+        <div class="input-group input-group-sm" style="min-width:140px">
+          <input type="text" class="form-control name-input"
+                 value="${c.name || ''}" placeholder="Ad daxil et" />
+          <button class="btn btn-outline-secondary btn-save-name" type="button">✔</button>
+        </div>
+      </td>
+      <td><span class="badge ${notifClass}">${c.notification_type}</span></td>
+      <td><span class="badge ${statusClass}">${c.status}</span></td>
+      <td class="text-muted small">${c.created_at}</td>
+      <td>${actionCell}</td>
+    </tr>`;
+}
+
+/* ── Poll ───────────────────────────────────────────────── */
+async function poll() {
+  try {
+    const res = await fetch('/bar/dashboard/data/');
+    if (!res.ok) return;
+    const { calls } = await res.json();
+
+    const tbody = document.getElementById('calls-body');
+    const noCallsEl = document.getElementById('no-calls');
+
+    if (!calls.length) {
+      tbody.innerHTML = '';
+      noCallsEl.classList.remove('d-none');
+    } else {
+      noCallsEl.classList.add('d-none');
+      tbody.innerHTML = calls.map((c, i) => buildRow(c, i + 1)).join('');
+      bindActions();
+    }
+
+    document.getElementById('last-refresh').textContent =
+      'Son yenilənmə: ' + new Date().toLocaleTimeString('az');
+  } catch (_) { /* ignore */ }
+}
+
+/* ── Action handlers ────────────────────────────────────── */
+function bindActions() {
+  document.querySelectorAll('.btn-save-name').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const row = btn.closest('tr');
+      const token = row.dataset.token;
+      const name = row.querySelector('.name-input').value.trim();
+      await postJSON(`/bar/update-name/${token}/`, { name });
+    });
+  });
+
+  document.querySelectorAll('.btn-call').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const row = btn.closest('tr');
+      const token = row.dataset.token;
+      btn.disabled = true;
+      btn.textContent = '…';
+      const data = await postJSON(`/bar/call/${token}/`);
+      if (data.ok) {
+        poll();
+      } else {
+        alert('Xəta: ' + (data.error || 'Bilinməyən'));
+        btn.disabled = false;
+        btn.textContent = 'Çağır';
+      }
+    });
+  });
+
+  document.querySelectorAll('.btn-done').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const row = btn.closest('tr');
+      const token = row.dataset.token;
+      await postJSON(`/bar/done/${token}/`);
+      poll();
+    });
+  });
+}
+
+async function postJSON(url, body = {}) {
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+    body: JSON.stringify(body),
+  });
+  return res.json();
+}
+
+/* ── Init ───────────────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', () => {
+  bindActions();
+  poll();
+  setInterval(poll, 5000);
+});
+</script>
+</body>
+</html>
