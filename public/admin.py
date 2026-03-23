@@ -37,14 +37,22 @@ class ClientAdmin(admin.ModelAdmin):
 class LandingFeatureInline(admin.TabularInline):
     model = LandingFeature
     extra = 0
-    fields = ['sort_order', 'icon', 'title', 'description']
+    fields = [
+        'sort_order', 'icon',
+        'title', 'title_az', 'title_ru',
+        'description', 'description_az', 'description_ru',
+    ]
     ordering = ['sort_order']
 
 
 class LandingStepInline(admin.TabularInline):
     model = LandingStep
     extra = 0
-    fields = ['sort_order', 'number', 'title', 'description']
+    fields = [
+        'sort_order', 'number',
+        'title', 'title_az', 'title_ru',
+        'description', 'description_az', 'description_ru',
+    ]
     ordering = ['sort_order']
 
 
@@ -53,27 +61,65 @@ class LandingPageAdmin(admin.ModelAdmin):
     inlines = [LandingFeatureInline, LandingStepInline]
 
     fieldsets = [
-        ('Hero Section', {
+        ('Hero Section — EN', {
             'fields': [
-                'hero_badge',
-                'hero_title',
-                'hero_title_em',
-                'hero_subtitle',
-                'hero_btn_primary',
-                'hero_btn_secondary',
+                'hero_badge', 'hero_title', 'hero_title_em',
+                'hero_subtitle', 'hero_btn_primary', 'hero_btn_secondary',
             ],
         }),
-        ('Features Section', {
+        ('Hero Section — AZ', {
+            'classes': ['collapse'],
+            'fields': [
+                'hero_badge_az', 'hero_title_az', 'hero_title_em_az',
+                'hero_subtitle_az', 'hero_btn_primary_az', 'hero_btn_secondary_az',
+            ],
+        }),
+        ('Hero Section — RU', {
+            'classes': ['collapse'],
+            'fields': [
+                'hero_badge_ru', 'hero_title_ru', 'hero_title_em_ru',
+                'hero_subtitle_ru', 'hero_btn_primary_ru', 'hero_btn_secondary_ru',
+            ],
+        }),
+        ('Features Section — EN', {
             'fields': ['features_label', 'features_title', 'features_subtitle'],
         }),
-        ('"How It Works" Section', {
+        ('Features Section — AZ', {
+            'classes': ['collapse'],
+            'fields': ['features_label_az', 'features_title_az', 'features_subtitle_az'],
+        }),
+        ('Features Section — RU', {
+            'classes': ['collapse'],
+            'fields': ['features_label_ru', 'features_title_ru', 'features_subtitle_ru'],
+        }),
+        ('"How It Works" Section — EN', {
             'fields': ['steps_label', 'steps_title', 'steps_subtitle'],
         }),
-        ('Call-to-Action Section', {
+        ('"How It Works" Section — AZ', {
+            'classes': ['collapse'],
+            'fields': ['steps_label_az', 'steps_title_az', 'steps_subtitle_az'],
+        }),
+        ('"How It Works" Section — RU', {
+            'classes': ['collapse'],
+            'fields': ['steps_label_ru', 'steps_title_ru', 'steps_subtitle_ru'],
+        }),
+        ('Call-to-Action Section — EN', {
             'fields': ['cta_title', 'cta_subtitle', 'cta_btn'],
         }),
-        ('Footer', {
+        ('Call-to-Action Section — AZ', {
+            'classes': ['collapse'],
+            'fields': ['cta_title_az', 'cta_subtitle_az', 'cta_btn_az'],
+        }),
+        ('Call-to-Action Section — RU', {
+            'classes': ['collapse'],
+            'fields': ['cta_title_ru', 'cta_subtitle_ru', 'cta_btn_ru'],
+        }),
+        ('Footer — EN', {
             'fields': ['footer_text'],
+        }),
+        ('Footer — AZ / RU', {
+            'classes': ['collapse'],
+            'fields': ['footer_text_az', 'footer_text_ru'],
         }),
     ]
 

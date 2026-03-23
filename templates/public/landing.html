@@ -112,27 +112,27 @@
 
 <!-- HERO -->
 <section class="hero">
-  <div class="hero-badge">{{ page.hero_badge }}</div>
-  <h1>{{ page.hero_title }}<br/><em>{{ page.hero_title_em }}</em></h1>
-  <p>{{ page.hero_subtitle }}</p>
+  <div class="hero-badge">{{ page.translated_hero_badge }}</div>
+  <h1>{{ page.translated_hero_title }}<br/><em>{{ page.translated_hero_title_em }}</em></h1>
+  <p>{{ page.translated_hero_subtitle }}</p>
   <div class="hero-actions">
-    <a href="/register/" class="btn btn-primary btn-lg">{{ page.hero_btn_primary }}</a>
-    <a href="/login/" class="btn btn-lg btn-hero-ghost">{{ page.hero_btn_secondary }}</a>
+    <a href="/register/" class="btn btn-primary btn-lg">{{ page.translated_hero_btn_primary }}</a>
+    <a href="/login/" class="btn btn-lg btn-hero-ghost">{{ page.translated_hero_btn_secondary }}</a>
   </div>
 </section>
 
 <!-- FEATURES -->
 <section class="section">
   <div class="section-inner">
-    <p class="section-label">{{ page.features_label }}</p>
-    <h2 class="section-title">{{ page.features_title }}</h2>
-    <p class="section-sub">{{ page.features_subtitle }}</p>
+    <p class="section-label">{{ page.translated_features_label }}</p>
+    <h2 class="section-title">{{ page.translated_features_title }}</h2>
+    <p class="section-sub">{{ page.translated_features_subtitle }}</p>
     <div class="features-grid">
       {% for feature in page.features.all %}
         <div class="feature-card">
           <div class="feature-icon">{{ feature.icon }}</div>
-          <h3>{{ feature.title }}</h3>
-          <p>{{ feature.description }}</p>
+          <h3>{{ feature.translated_title }}</h3>
+          <p>{{ feature.translated_description }}</p>
         </div>
       {% empty %}
         <p style="color:#6b7280">No features added yet. Add them via Django admin.</p>
@@ -144,15 +144,15 @@
 <!-- HOW IT WORKS -->
 <section class="section how-bg">
   <div class="section-inner">
-    <p class="section-label">{{ page.steps_label }}</p>
-    <h2 class="section-title">{{ page.steps_title }}</h2>
-    <p class="section-sub">{{ page.steps_subtitle }}</p>
+    <p class="section-label">{{ page.translated_steps_label }}</p>
+    <h2 class="section-title">{{ page.translated_steps_title }}</h2>
+    <p class="section-sub">{{ page.translated_steps_subtitle }}</p>
     <div class="steps">
       {% for step in page.steps.all %}
         <div class="step">
           <div class="step-num">{{ step.number }}</div>
-          <h3>{{ step.title }}</h3>
-          <p>{{ step.description }}</p>
+          <h3>{{ step.translated_title }}</h3>
+          <p>{{ step.translated_description }}</p>
         </div>
       {% empty %}
         <p style="color:#6b7280">No steps added yet.</p>
@@ -163,14 +163,14 @@
 
 <!-- CTA -->
 <section class="cta-section">
-  <h2>{{ page.cta_title }}</h2>
-  <p>{{ page.cta_subtitle }}</p>
-  <a href="/register/" class="btn btn-primary btn-lg">{{ page.cta_btn }}</a>
+  <h2>{{ page.translated_cta_title }}</h2>
+  <p>{{ page.translated_cta_subtitle }}</p>
+  <a href="/register/" class="btn btn-primary btn-lg">{{ page.translated_cta_btn }}</a>
 </section>
 
 <!-- FOOTER -->
 <footer>
-  <p>{{ page.footer_text }} · <a href="/register/">Register</a> · <a href="/login/">Login</a></p>
+  <p>{{ page.translated_footer_text }} · <a href="/register/">{% trans "Register" %}</a> · <a href="/login/">{% trans "Log in" %}</a></p>
 </footer>
 
 </body>
